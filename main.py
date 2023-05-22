@@ -68,18 +68,23 @@ class Thread1(QThread):
                 print(f"재시도 중")
                 print(e)
                 self.parent.label_main.setText(f"{e}")
+                Thread1.selectPeople(self,driver)
 
     def agreement(self, driver):
-        self.parent.label_main.setText("팝업창 동의 중")
-        print(driver.find_element(By.XPATH,'/html/body/div[4]/div[1]/a'))
-        driver.find_element(By.XPATH,'/html/body/div[4]/div[1]/a').click()
-        print('동의 확인')
-        Thread1.selectPeople(self,driver)
+        try:
+            self.parent.label_main.setText("팝업창 동의 중")
+            print(driver.find_element(By.XPATH,'/html/body/div[4]/div[1]/a'))
+            driver.find_element(By.XPATH,'/html/body/div[4]/div[1]/a').click()
+            print('동의 확인')
+            Thread1.selectPeople(self,driver)
+        except:
+            Thread1.selectPeople(self,driver)
 
     def selectPeople(self,driver):
         driver.find_element(By.XPATH,'//*[@id="nop_group_adult"]/ul/li[3]/a').click()
         self.stop_flag = False
         self.parent.label_main.setText("좌석 선택 중")
+
         while not self.stop_flag:
             try:
                 validButton = driver.find_element(By.XPATH,'//*[@id="tnb_step_btn_right"]').get_attribute('class')
@@ -94,9 +99,12 @@ class Thread1(QThread):
                     continue
 
             except Exception as e:
-                print(f"재시도 중")
-                print(e)
-                self.parent.label_main.setText(f"{e}")
+                if "좌석" in e:
+                    driver.alert.dismiss()
+                else:
+                    print(f"재시도 중111")
+                    print(e)
+                    self.parent.label_main.setText(f"{e}")
     
     def payment(self,driver):
         self.parent.label_main.setText("결제 준비 중")
